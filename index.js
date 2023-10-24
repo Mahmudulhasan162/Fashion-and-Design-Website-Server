@@ -25,6 +25,8 @@ async function run() {
 
     const productCollection = client.db('productDATA').collection('products')
 
+    const brandCollection = client.db('brandData').collection('brands')
+
     const defaultProducts = [
         {
           name: 'Zara Men Cotton Full Sleeve Shirt',
@@ -243,13 +245,57 @@ async function run() {
           rating: 4.6
         }
       ];
-      
+    
+      const brandData = [
+        {
+          "id": 1,
+          "brand_name": "Nike",
+          "brand_picture": "https://i.ibb.co/PcBHRvW/F-19-NIKE.jpg"
+        },
+        {
+          "id": 2,
+          "brand_name": "Adidas",
+          "brand_picture": "https://i.ibb.co/y60w5jb/Adidas-logo.webp"
+        },
+        {
+          "id": 3,
+          "brand_name": "Gucci",
+          "brand_picture": "https://i.ibb.co/0CJgpmG/gucci.webp"
+        },
+        {
+          "id": 4,
+          "brand_name": "Zara",
+          "brand_picture": "https://i.ibb.co/NghZ1rC/6d2ccd795e409bb68eec5db364e797ef.jpg"
+        },
+        {
+          "id": 5,
+          "brand_name": "H&M",
+          "brand_picture": "https://i.ibb.co/MhLvRMR/image.jpg"
+        },
+        {
+          "id": 6,
+          "brand_name": "Levi's",
+          "brand_picture": "https://i.ibb.co/3MLGGXn/31581.png"
+        }
+      ]
+
       defaultProducts.forEach(async (product)=>{
         const {name, brand} = product;
         const count = await productCollection.countDocuments({name, brand});
         if(count === 0){
             await productCollection.insertOne(product);
         }
+      })
+
+      brandData.forEach(async (brand)=>{
+        await brandCollection.insertOne(brand);
+      })
+
+      app.get("/brands", async(req, res)=>{
+        const cursor = brandCollection.find();
+        const result = await cursor.toArray();
+        console.log(result);
+        res.send(result);
       })
 
     app.get("/products", async(req, res)=>{
