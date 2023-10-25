@@ -27,6 +27,8 @@ async function run() {
 
     const brandCollection = client.db('brandData').collection('brands')
 
+    const cartProducts = client.db('cartData').collection('cart')
+
     const defaultProducts = [
         {
           name: 'Zara Men Cotton Full Sleeve Shirt',
@@ -246,6 +248,14 @@ async function run() {
         }
       ];
     
+      defaultProducts.forEach(async (product)=>{
+        const {name, brand} = product;
+        const count = await productCollection.countDocuments({name, brand});
+        if(count === 0){
+            await productCollection.insertOne(product);
+        }
+      })
+
       const brandData = [
         {
           "id": 1,
@@ -279,16 +289,12 @@ async function run() {
         }
       ]
 
-      defaultProducts.forEach(async (product)=>{
-        const {name, brand} = product;
-        const count = await productCollection.countDocuments({name, brand});
-        if(count === 0){
-            await productCollection.insertOne(product);
-        }
-      })
-
       brandData.forEach(async (brand)=>{
+        const {brand_name} = brand;
+        const count = await brandCollection.countDocuments({brand_name});
+        if(count === 0){
         await brandCollection.insertOne(brand);
+        }
       })
 
       app.get("/brands", async(req, res)=>{
@@ -310,6 +316,18 @@ async function run() {
         const result= await productCollection.insertOne(newProducts);
         res.send(result)
     })
+
+    app.post("/cart", async(req, res)=>{
+      const cart = req.body;
+      console.log(cart);
+      const result= await cartProducts.insertOne(cart);
+      res.send(result);
+    })
+    app.get("/cart", async(req, res)=>{
+      const cursor = cartProducts.find();
+      const result = await cursor.toArray();
+      res.send(result);
+  })
 
 
     await client.db("admin").command({ ping: 1 });
